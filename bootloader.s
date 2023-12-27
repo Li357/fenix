@@ -1,8 +1,8 @@
 /**
  * STM32F756 bootloader
- * - Set initial SP
- * - Set initial PC to the reset handler
- * - Set the interrupt vector table
+ * - Set the initial SP interrupt vector table in flash (isr_vector section used in linker)
+ * - Load this data from flash on startup, also zero out BSS sections
+ * - Branch to C runtime init
  * - Branch to main()
  */
 
@@ -63,14 +63,55 @@ _copy_bss_init:
 
 .size _reset_handler, . - _reset_handler
 
+/* default interrupt handler is just infinite loop */
 _default_handler:
   b _default_handler
 .size _default_handler, . - _default_handler
 
-/* set the initial SP and interrupt vector */
+/**
+ * set the initial SP and interrupt vector
+ * reference: 2.4.4 of https://www.st.com/resource/en/programming_manual/pm0253-stm32f7-series-and-stm32h7-series-cortexm7-processor-programming-manual-stmicroelectronics.pdf
+ */
 .section .isr_vector,"a",%progbits
 .type _isr_vector, %object
 .size _isr_vector, . - _isr_vector
 _isr_vector:
   .word _estack
-  .word _reset_handler 
+  .word _reset_handler
+  .word _nmi_handler
+  .word _hardf_handler
+  .word _memmanagef_handler
+  .word _busf_handler
+  .word _usagef_handler
+  .word 0
+  .word 0
+  .word 0
+  .word 0
+  .word _svc_handler
+  .word _debug_handler
+  .word 0
+  .word _pendsv_handler
+  .word _systick_handler
+
+  /* peripheral interrupts IRQ0-239 */
+
+  /* set weak aliases so these can be overrided in our application */
+  .weak _nmi_handler
+  .thumb_set _nmi_handler, _default_handler
+  .weak _hardf_handler
+  .thumb_set _hardf_handler, _default_handler
+  .weak _memmanagef_handler
+  .thumb_set _memmanagef_handler, _default_handler
+  .weak _busf_handler
+  .thumb_set _busf_handler, _default_handler
+  .weak _usagef_handler
+  .thumb_set _usagef_handler, _default_handler
+  .weak _svc_handler
+  .thumb_set _svc_handler, _default_handler
+  .weak _debug_handler
+  .thumb_set _debug_handler, _default_handler
+  .weak _pendsv_handler
+  .thumb_set _pendsv_handler, _default_handler
+  .weak _systick_handler
+  .thumb_set _systick_handler, _default_handler
+
