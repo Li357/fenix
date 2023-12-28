@@ -4,3 +4,5 @@ mach create
 machine LoadPlatformDescription @platforms/boards/stm32f7_discovery-bb.repl
 
 sysbus LoadELF $bin
+
+machine StartGdbServer 3333

@@ -60,6 +60,7 @@ _copy_bss_init:
   /* then initialize C runtime and call main() */
   bl __libc_init_array
   bl main
+  bx lr
 
 .size _reset_handler, . - _reset_handler
 

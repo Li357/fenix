@@ -1,8 +1,11 @@
 TARGET = fenix
 
+DEBUG = 1
+
 BUILD_DIR = build
 
-C_SOURCES = src/main.c
+C_SOURCES = drivers/gpio.c src/main.c
+C_INCLUDES = -Idrivers/include -Isrc/include
 ASM_SOURCES = bootloader.s
 
 PREFIX = arm-none-eabi-
@@ -17,8 +20,12 @@ CPU = -mcpu=cortex-m7
 FPU = -mfpu=fpv5-d16 -mfloat-abi=hard
 MCU = -mthumb $(CPU) $(FPU)
 
-ASFLAGS = $(MCU) -Wall -Werror -fdata-sections -ffunction-sections
-CFLAGS += $(MCU) -Wall -Werror -fdata-sections -ffunction-sections
+ASFLAGS = $(MCU) -Wall -Werror -fdata-sections -ffunction-sections -Og
+CFLAGS += $(MCU) $(C_INCLUDES) -Wall -Werror -fdata-sections -ffunction-sections -Og
+
+ifeq ($(DEBUG), 1)
+	CFLAGS += -g -gdwarf-2
+endif
 
 LDSCRIPT = flash.ld
 
