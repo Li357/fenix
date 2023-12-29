@@ -1,14 +1,17 @@
-#include "gpio.h"
+#include "uart.h"
 
 int main() {
-  gpio_cfg_t cfg = {
-    .bank = GPIO_B,
-    .port = GPIO_1,
-    .mode = GPIO_ANALOG,
+  usart_cfg_t cfg = {
+    .peripheral = USART_1,
+    .baudrate = 9600,
   };
 
-  gpio_init(GPIO_B);
-  gpio_port_init(&cfg);
+  uart_usart_init(USART_1);
+  usart_peri_init(&cfg);
+
+  uint8_t msg[13] = "Hello World!\n";
+
+  usart_transmit(msg);
 
   while (1);
 

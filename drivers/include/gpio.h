@@ -16,18 +16,18 @@ typedef volatile struct {
 } gpio_reg_t;
   
 #define rGPIO_ADDR(x) ((gpio_reg_t *)(x))
-#define rGPIOA   (rGPIO_ADDR(GPIOA_BASE))
-#define rGPIOB   (rGPIO_ADDR(GPIOB_BASE))
-#define rGPIOC   (rGPIO_ADDR(GPIOC_BASE))
-#define rGPIOD   (rGPIO_ADDR(GPIOD_BASE))
-#define rGPIOE   (rGPIO_ADDR(GPIOE_BASE))
-#define rGPIOF   (rGPIO_ADDR(GPIOF_BASE))
-#define rGPIOG   (rGPIO_ADDR(GPIOG_BASE))
-#define rGPIOH   (rGPIO_ADDR(GPIOH_BASE))
-#define rGPIOI   (rGPIO_ADDR(GPIOI_BASE))
-#define rGPIOJ   (rGPIO_ADDR(GPIOJ_BASE))
-#define rGPIOK   (rGPIO_ADDR(GPIOK_BASE))
-#define rGPIO(x) (rGPIO_ADDR(AHB1_BASE + (x) * 0x400UL))
+#define rGPIOA        (rGPIO_ADDR(GPIOA_BASE))
+#define rGPIOB        (rGPIO_ADDR(GPIOB_BASE))
+#define rGPIOC        (rGPIO_ADDR(GPIOC_BASE))
+#define rGPIOD        (rGPIO_ADDR(GPIOD_BASE))
+#define rGPIOE        (rGPIO_ADDR(GPIOE_BASE))
+#define rGPIOF        (rGPIO_ADDR(GPIOF_BASE))
+#define rGPIOG        (rGPIO_ADDR(GPIOG_BASE))
+#define rGPIOH        (rGPIO_ADDR(GPIOH_BASE))
+#define rGPIOI        (rGPIO_ADDR(GPIOI_BASE))
+#define rGPIOJ        (rGPIO_ADDR(GPIOJ_BASE))
+#define rGPIOK        (rGPIO_ADDR(GPIOK_BASE))
+#define rGPIO(x)      (rGPIO_ADDR(AHB1_BASE + (x) * 0x400UL))
 
 typedef enum {
   GPIO_A,

@@ -5,4 +5,6 @@ machine LoadPlatformDescription @platforms/boards/stm32f7_discovery-bb.repl
 
 sysbus LoadELF $bin
 
+showAnalyzer sysbus.usart1
+
 machine StartGdbServer 3333

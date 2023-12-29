@@ -4,7 +4,7 @@ DEBUG = 1
 
 BUILD_DIR = build
 
-C_SOURCES = drivers/gpio.c src/main.c
+C_SOURCES = drivers/gpio.c drivers/uart.c src/main.c
 C_INCLUDES = -Idrivers/include -Isrc/include
 ASM_SOURCES = bootloader.s
 
