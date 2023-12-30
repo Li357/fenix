@@ -30,3 +30,5 @@
 
 #define RCC_BASE       (AHB1_BASE + 0x3800UL)
 
+#define PPB_BASE       (0xE000E000UL)
+#define SYST_BASE      (PPB_BASE + 0x10UL)

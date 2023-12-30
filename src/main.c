@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include "uart.h"
+#include "systick.h"
+#include "util.h"
 
 int main() {
+  systick_init(CLOCK_SPEED); // tick every second
+
   usart_cfg_t cfg = {
     .peripheral = USART_1,
     .baudrate = 9600,
@@ -12,9 +16,10 @@ int main() {
 
   char *msg = "Hello World!\n";
 
-  puts(msg);
-
-  while (1);
+  while (1) {
+    delay(1); // log every second
+    puts(msg);
+  }
 
   return 0;
 }
