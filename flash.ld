@@ -77,6 +77,13 @@ SECTIONS {
     _ebss = .;
   } > RAM
 
+  ._user_heap_stack : {
+    . = ALIGN(8);
+    PROVIDE (end = .);  /* C runtime addresses for _sbrk */
+    PROVIDE (_end = .); 
+    . = ALIGN(8);
+  } > RAM
+
   /* get rid of unused sections from standard libraries */
   /DISCARD/ : {
     libc.a (*)

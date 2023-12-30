@@ -37,4 +37,4 @@ typedef struct {
 
 void uart_usart_init(uart_usart_peri_t peripheral);
 void usart_peri_init(usart_cfg_t *config);
-void usart_transmit(uint8_t *msg);
+void usart_transmit(char *ptr, int len);

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "uart.h"
 
 int main() {
@@ -9,9 +10,9 @@ int main() {
   uart_usart_init(USART_1);
   usart_peri_init(&cfg);
 
-  uint8_t msg[13] = "Hello World!\n";
+  char *msg = "Hello World!\n";
 
-  usart_transmit(msg);
+  puts(msg);
 
   while (1);
 

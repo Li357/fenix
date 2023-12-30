@@ -35,7 +35,7 @@ _reset_handler:
   /* first copy initialized data */
 _copy_data_loop:
   ldr r4, [r2, r3]    /* load from flash then store to RAM */
-  str r4, [r0, r2]
+  str r4, [r0, r3]
   adds r3, r3, #4
 
 _copy_data_init:

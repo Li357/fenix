@@ -40,10 +40,8 @@ void usart_peri_init(usart_cfg_t *config) {
   rUSART1->CR1 |= 0x9UL;
 }
 
-void usart_transmit(uint8_t *msg) {
+void usart_transmit(char *ptr, int len) {
   while (!(rUSART1->ISR & 0x40UL));
-  while (*msg != '\n') {
-    rUSART1->TDR = *msg;
-    msg++;
-  }
+  for (int i = 0; i < len; i++, ptr++)
+    rUSART1->TDR = *ptr;
 }
