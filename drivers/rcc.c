@@ -1,8 +1,12 @@
 #include "rcc.h"
 #include "config.h"
+#include "flash.h"
 #include "systick.h"
 
 void _system_init() {
+  // Enable flash instruction prefetch
+  FLASH->ACR |= FLASH_ACR_PRFTEN;
+
   // Set PLL factors from config.h
   RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLP | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLM);
   RCC->PLLCFGR |= PLL_P << RCC_PLLCFGR_PLLPSHIFT;
