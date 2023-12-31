@@ -4,8 +4,6 @@
 #include "util.h"
 
 int main() {
-  systick_init(CLOCK_SPEED / 1000);  // tick every ms
-
   usart_init(USART1, 115200);
 
   char *msg = "Hello World!\n";

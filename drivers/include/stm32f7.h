@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#define CLOCK_SPEED (216000000)
+#define BASE_CLOCK (16000000)
 
 /* Memory map */
 #define APB1_BASE   (0x40000000UL)

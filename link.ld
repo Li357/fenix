@@ -1,7 +1,7 @@
 ENTRY(_reset_handler)
 
 MEMORY {
-  FLASH (rw)  : ORIGIN =  0x8000000, LENGTH = 1024K
+  FLASH (r)  : ORIGIN =  0x8000000, LENGTH = 1024K
   RAM   (rwx) : ORIGIN = 0x20000000, LENGTH = 320K
 }
 
@@ -80,7 +80,7 @@ SECTIONS {
   ._user_heap_stack : {
     . = ALIGN(8);
     PROVIDE (end = .);  /* C runtime addresses for _sbrk */
-    PROVIDE (_end = .); 
+    PROVIDE (_end = .);
     . = ALIGN(8);
   } > RAM
 

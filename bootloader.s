@@ -25,7 +25,7 @@
 _reset_handler:
   ldr sp, =_estack    /* copy SP from flash to RAM */
 
-  /* copy all data from flash to RAM */  
+  /* copy all data from flash to RAM */
   ldr r0, =_sdata
   ldr r1, =_edata
   ldr r2, =_sidata
@@ -57,7 +57,8 @@ _copy_bss_init:
   cmp r2, r4
   bcc _copy_bss_loop
 
-  /* then initialize C runtime and call main() */
+  /* then initialize clocks, C runtime and call main() */
+  bl _system_init
   bl __libc_init_array
   bl main
   bx lr

@@ -4,7 +4,7 @@ DEBUG = 1
 
 BUILD_DIR = build
 
-C_SOURCES = drivers/gpio.c drivers/usart.c drivers/systick.c src/syscall.c src/main.c src/util.c
+C_SOURCES = drivers/gpio.c drivers/usart.c drivers/systick.c drivers/rcc.c src/syscall.c src/main.c src/util.c
 C_INCLUDES = -Idrivers/include -Isrc/include
 ASM_SOURCES = bootloader.s
 
@@ -28,10 +28,10 @@ ifeq ($(DEBUG), 1)
 	CFLAGS += -g -gdwarf-2
 endif
 
-LDSCRIPT = flash.ld
+LDSCRIPT = link.ld
 
 LIBS = -lc -lm -lnosys
-LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBS) -Wl,--gc-sections -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref
+LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBS) -Wl,--gc-sections -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--no-warn-rwx-segments
 
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
 
@@ -57,7 +57,7 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(BIN) $< $@
 
 $(BUILD_DIR):
-	mkdir $@
+	mkdir -p $@
 
 .PHONY: clean
 clean:

@@ -9,7 +9,6 @@ void systick_init(uint32_t ticks) {
   SYST->CVR = 0;
   SYST->CSR |= SYST_CSR_ENABLE | SYST_CSR_TICKINT;
   _systicks = 0;
-  RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
 }
 
 void _systick_handler() {

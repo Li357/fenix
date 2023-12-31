@@ -22,8 +22,10 @@ void usart_init(usart_reg_t *usart, uint32_t baudrate) {
   if (usart == UART7) UART_INIT(UART7, RCC->APB1ENR);
   if (usart == UART8) UART_INIT(UART8, RCC->APB1ENR);
 
+  uint32_t clock = usart == USART6 || usart == USART1 ? APB2_CLOCK : APB1_CLOCK;
+
   // Calculate division rate
-  uint16_t uartdiv = CLOCK_SPEED / baudrate;
+  uint16_t uartdiv = clock / baudrate;
   usart->BRR       = ((uartdiv / 16) << USART_BRR_QSHIFT | (uartdiv % 16));
 
   // Enable USART transmit

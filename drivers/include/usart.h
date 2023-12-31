@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pindefs.h"
+#include "config.h"
 #include "stm32f7.h"
 
 #define USART_ISR_TXE    (1UL << 7)
