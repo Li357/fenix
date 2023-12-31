@@ -3,6 +3,10 @@ $bin ?= @build/fenix.elf
 mach create
 machine LoadPlatformDescription @platforms/boards/stm32f7_discovery-bb.repl
 
+sysbus LogPeripheralAccess sysbus.rcc
+sysbus LogPeripheralAccess sysbus.gpioPortA
+sysbus LogPeripheralAccess sysbus.usart1
+
 sysbus LoadELF $bin
 
 showAnalyzer sysbus.usart1

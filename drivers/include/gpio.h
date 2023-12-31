@@ -2,6 +2,14 @@
 
 #include "stm32f7.h"
 
+#define PIN(bank, num)       (((bank - 'A') << 8) | (num))
+#define AFPIN(bank, num, af) (PIN(bank, num) | ((af) << 4))
+#define PINBANK(pin)         (pin >> 8)
+#define PINAF(pin)           ((pin & 0xF0) >> 4)
+#define PINNUM(pin)          (pin & 0xF)
+
+typedef uint16_t gpio_pin_t;
+
 typedef volatile struct {
   uint32_t MODER;
   uint32_t OTYPER;
@@ -15,71 +23,7 @@ typedef volatile struct {
   uint32_t AFHR;
 } gpio_reg_t;
   
-#define rGPIO_ADDR(x) ((gpio_reg_t *)(x))
-#define rGPIOA        (rGPIO_ADDR(GPIOA_BASE))
-#define rGPIOB        (rGPIO_ADDR(GPIOB_BASE))
-#define rGPIOC        (rGPIO_ADDR(GPIOC_BASE))
-#define rGPIOD        (rGPIO_ADDR(GPIOD_BASE))
-#define rGPIOE        (rGPIO_ADDR(GPIOE_BASE))
-#define rGPIOF        (rGPIO_ADDR(GPIOF_BASE))
-#define rGPIOG        (rGPIO_ADDR(GPIOG_BASE))
-#define rGPIOH        (rGPIO_ADDR(GPIOH_BASE))
-#define rGPIOI        (rGPIO_ADDR(GPIOI_BASE))
-#define rGPIOJ        (rGPIO_ADDR(GPIOJ_BASE))
-#define rGPIOK        (rGPIO_ADDR(GPIOK_BASE))
-#define rGPIO(x)      (rGPIO_ADDR(AHB1_BASE + (x) * 0x400UL))
-
-typedef enum {
-  GPIO_A,
-  GPIO_B,
-  GPIO_C,
-  GPIO_D,
-  GPIO_E,
-  GPIO_F,
-  GPIO_G,
-  GPIO_H,
-  GPIO_I,
-  GPIO_J,
-  GPIO_K,
-} gpio_bank_t;
-
-typedef enum {
-  GPIO_0,
-  GPIO_1,
-  GPIO_2,
-  GPIO_3,
-  GPIO_4,
-  GPIO_5,
-  GPIO_6,
-  GPIO_7,
-  GPIO_8,
-  GPIO_9,
-  GPIO_10,
-  GPIO_11,
-  GPIO_12,
-  GPIO_13,
-  GPIO_14,
-  GPIO_15,
-} gpio_port_t;
-
-typedef enum {
-  GPIO_AF0,
-  GPIO_AF1,
-  GPIO_AF2,
-  GPIO_AF3,
-  GPIO_AF4,
-  GPIO_AF5,
-  GPIO_AF6,
-  GPIO_AF7,
-  GPIO_AF8,
-  GPIO_AF9,
-  GPIO_AF10,
-  GPIO_AF11,
-  GPIO_AF12,
-  GPIO_AF13,
-  GPIO_AF14,
-  GPIO_AF15,
-} gpio_af_t;
+#define GPIO(bank)      ((gpio_reg_t *)(GPIOA_BASE + (bank) * 0x400UL))
 
 typedef enum {
   GPIO_INPUT,
@@ -107,15 +51,9 @@ typedef enum {
   GPIO_PUPDRES,
 } gpio_pupd_t;
 
-typedef struct {
-  gpio_bank_t bank;
-  gpio_port_t port;
-  gpio_mode_t mode;
-  gpio_output_type_t output_type;
-  gpio_output_speed_t output_speed;
-  gpio_pupd_t pupd;
-  gpio_af_t af;
-} gpio_cfg_t;
-
-void gpio_init(gpio_bank_t bank);
-void gpio_port_init(gpio_cfg_t *cfg);
+void gpio_pin_init(gpio_pin_t pin);
+void gpio_pin_set_mode(gpio_pin_t pin, gpio_mode_t mode);
+void gpio_pin_set_output_type(gpio_pin_t pin, gpio_output_type_t type);
+void gpio_pin_set_speed(gpio_pin_t pin, gpio_output_speed_t speed);
+void gpio_pin_set_pupd(gpio_pin_t pin, gpio_pupd_t pupd);
+void gpio_pin_set_alt_func(gpio_pin_t pin, uint8_t af);

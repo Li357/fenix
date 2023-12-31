@@ -1,9 +1,9 @@
 #include <unistd.h>
 #include <sys/stat.h>
-#include "uart.h"
+#include "usart.h"
 
 int _write(int fd, char *ptr, int len) {
-  if (fd == STDOUT_FILENO) usart_transmit(ptr, len);
+  if (fd == STDOUT_FILENO) usart_transmit(USART1, ptr, len);
   return -1;
 }
 

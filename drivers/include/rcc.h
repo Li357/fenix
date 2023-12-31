@@ -38,4 +38,4 @@ typedef volatile struct {
   uint32_t DCKCFGR2;
 } rcc_reg_t;
 
-#define rRCC ((rcc_reg_t *)RCC_BASE)
+#define RCC ((rcc_reg_t *)RCC_BASE)
