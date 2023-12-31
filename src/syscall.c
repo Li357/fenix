@@ -12,7 +12,7 @@ int _read(int fd, char *ptr, int len) {
 }
 
 int _close(int fd) {
-  return -1; 
+  return -1;
 }
 
 int _lseek(int fd, char *ptr, int dir) {

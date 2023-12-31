@@ -2,6 +2,9 @@
 
 #include "stm32f7.h"
 
+#define SYST_CSR_ENABLE  (1UL << 0)
+#define SYST_CSR_TICKINT (1UL << 1)
+
 typedef volatile struct {
   uint32_t CSR;
   uint32_t RVR;

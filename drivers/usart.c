@@ -21,17 +21,17 @@ void usart_init(usart_reg_t *usart, uint32_t baudrate) {
   if (usart == USART6) USART_INIT(USART6, RCC->APB2ENR);
   if (usart == UART7)  UART_INIT(UART7, RCC->APB1ENR);
   if (usart == UART8)  UART_INIT(UART8, RCC->APB1ENR);
-  
+
   // Calculate division rate
   uint16_t uartdiv = CLOCK_SPEED / baudrate;
   usart->BRR = ((uartdiv / 16) << USART_BRR_QSHIFT | (uartdiv % 16));
 
   // Enable USART transmit
-  usart->CR1 |= 0x9UL;//USART_CR1_TE | USART_CR1_UE;
+  usart->CR1 |= USART_CR1_TE | USART_CR1_UE;
 }
 
 void usart_transmit(usart_reg_t *usart, char *ptr, int len) {
-  while (!(usart->ISR & USART_ISR_TXE));
+  while (!(usart->ISR & USART_ISR_TXE)) {}
   for (int i = 0; i < len; i++, ptr++)
     usart->TDR = *ptr;
 }

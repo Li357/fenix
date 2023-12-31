@@ -2,6 +2,8 @@
 
 #include "stm32f7.h"
 
+#define RCC_APB2ENR_SYSCFGEN (1UL << 14)
+
 typedef volatile struct {
   uint32_t CR;
   uint32_t PLLCFGR;

@@ -4,12 +4,12 @@
 void gpio_pin_init(gpio_pin_t pin) {
   // Enable the GPIO bank in AHB
   RCC->AHB1ENR |= 1 << PINBANK(pin);
-  
+
   // Support setting an alternate function on init
   if (!PINAF(pin)) return;
   gpio_pin_set_alt_func(pin, PINAF(pin));
   gpio_pin_set_mode(pin, GPIO_AF);
-} 
+}
 
 void gpio_pin_set_mode(gpio_pin_t pin, gpio_mode_t mode) {
   gpio_reg_t *GPIOx = GPIO(PINBANK(pin));
@@ -40,7 +40,7 @@ void gpio_pin_set_pupd(gpio_pin_t pin, gpio_pupd_t pupd) {
 
 void gpio_pin_set_alt_func(gpio_pin_t pin, uint8_t af) {
   gpio_reg_t *GPIOx = GPIO(PINBANK(pin));
- 
+
   uint32_t pos = PINNUM(pin) & 0x7UL;
   volatile uint32_t *reg = PINNUM(pin) < 8 ? &GPIOx->AFLR : &GPIOx->AFHR;
   *reg &= ~(0xFUL << pos);
