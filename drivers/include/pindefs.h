@@ -45,6 +45,3 @@
 #define UART8_RX   AFPIN('E', 0, 8)
 #define UART8_CTS  AFPIN('D', 14, 8)
 #define UART8_RTS  AFPIN('D', 15, 8)
-
-
-

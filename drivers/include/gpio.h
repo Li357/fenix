@@ -22,8 +22,8 @@ typedef volatile struct {
   uint32_t AFLR;
   uint32_t AFHR;
 } gpio_reg_t;
-  
-#define GPIO(bank)      ((gpio_reg_t *)(GPIOA_BASE + (bank) * 0x400UL))
+
+#define GPIO(bank) ((gpio_reg_t *)(GPIOA_BASE + (bank) * 0x400UL))
 
 typedef enum {
   GPIO_INPUT,

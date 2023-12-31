@@ -1,7 +1,7 @@
 #pragma once
 
-#include "stm32f7.h"
 #include "pindefs.h"
+#include "stm32f7.h"
 
 #define USART_ISR_TXE    (1UL << 7)
 #define USART_BRR_QSHIFT (4UL)
@@ -17,17 +17,19 @@
 #define UART7_CLK_BIT    (1UL << 30)
 #define UART8_CLK_BIT    (1UL << 31)
 
-#define UART_INIT(usart, apb) {                  \
-    apb |= usart##_CLK_BIT;                      \
-    gpio_pin_init(usart##_TX);                   \
-    gpio_pin_init(usart##_RX);                   \
-    gpio_pin_init(usart##_CTS);                  \
-    gpio_pin_init(usart##_RTS);                  \
-  } 
+#define UART_INIT(usart, apb)   \
+  {                             \
+    apb |= usart##_CLK_BIT;     \
+    gpio_pin_init(usart##_TX);  \
+    gpio_pin_init(usart##_RX);  \
+    gpio_pin_init(usart##_CTS); \
+    gpio_pin_init(usart##_RTS); \
+  }
 
-#define USART_INIT(usart, apb) {                 \
-    UART_INIT(usart, apb);                       \
-    gpio_pin_init(usart##_CK);                   \
+#define USART_INIT(usart, apb) \
+  {                            \
+    UART_INIT(usart, apb);     \
+    gpio_pin_init(usart##_CK); \
   }
 
 typedef volatile struct {

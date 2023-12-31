@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 #include "systick.h"
 #include "usart.h"
 #include "util.h"

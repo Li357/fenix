@@ -1,5 +1,5 @@
-#include <unistd.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include "usart.h"
 
 int _write(int fd, char *ptr, int len) {

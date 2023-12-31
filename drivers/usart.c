@@ -1,6 +1,6 @@
-#include "rcc.h"
 #include "usart.h"
 #include "gpio.h"
+#include "rcc.h"
 
 usart_reg_t *USART1 = ((usart_reg_t *)USART1_BASE);
 usart_reg_t *USART2 = ((usart_reg_t *)USART2_BASE);
@@ -16,15 +16,15 @@ void usart_init(usart_reg_t *usart, uint32_t baudrate) {
   if (usart == USART1) USART_INIT(USART1, RCC->APB2ENR);
   if (usart == USART2) USART_INIT(USART2, RCC->APB1ENR);
   if (usart == USART3) USART_INIT(USART3, RCC->APB1ENR);
-  if (usart == UART4)  UART_INIT(UART4, RCC->APB1ENR);
-  if (usart == UART5)  UART_INIT(UART5, RCC->APB1ENR);
+  if (usart == UART4) UART_INIT(UART4, RCC->APB1ENR);
+  if (usart == UART5) UART_INIT(UART5, RCC->APB1ENR);
   if (usart == USART6) USART_INIT(USART6, RCC->APB2ENR);
-  if (usart == UART7)  UART_INIT(UART7, RCC->APB1ENR);
-  if (usart == UART8)  UART_INIT(UART8, RCC->APB1ENR);
+  if (usart == UART7) UART_INIT(UART7, RCC->APB1ENR);
+  if (usart == UART8) UART_INIT(UART8, RCC->APB1ENR);
 
   // Calculate division rate
   uint16_t uartdiv = CLOCK_SPEED / baudrate;
-  usart->BRR = ((uartdiv / 16) << USART_BRR_QSHIFT | (uartdiv % 16));
+  usart->BRR       = ((uartdiv / 16) << USART_BRR_QSHIFT | (uartdiv % 16));
 
   // Enable USART transmit
   usart->CR1 |= USART_CR1_TE | USART_CR1_UE;
@@ -32,6 +32,5 @@ void usart_init(usart_reg_t *usart, uint32_t baudrate) {
 
 void usart_transmit(usart_reg_t *usart, char *ptr, int len) {
   while (!(usart->ISR & USART_ISR_TXE)) {}
-  for (int i = 0; i < len; i++, ptr++)
-    usart->TDR = *ptr;
+  for (int i = 0; i < len; i++, ptr++) usart->TDR = *ptr;
 }
