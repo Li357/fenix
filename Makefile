@@ -4,7 +4,7 @@ DEBUG = 1
 
 BUILD_DIR = build
 
-C_SOURCES = drivers/gpio.c drivers/usart.c drivers/systick.c drivers/rcc.c src/syscall.c src/main.c src/util.c
+C_SOURCES = drivers/gpio.c drivers/usart.c drivers/ethernet.c drivers/systick.c drivers/rcc.c src/syscall.c src/main.c src/util.c
 C_INCLUDES = -Idrivers/include -Isrc/include
 ASM_SOURCES = bootloader.s
 PREFIX = arm-none-eabi-

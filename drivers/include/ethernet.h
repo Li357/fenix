@@ -1,6 +1,47 @@
+#pragma once
+
 #include "stm32f7.h"
 
-#define ETH_DMABMR_SR (1UL << 0)
+#define ETH_MACCR_FESSHIFT       (14)
+#define ETH_MACCR_DMSHIFT        (11)
+#define ETH_MACCR_TE             (1UL << 3)
+#define ETH_MACCR_RE             (1UL << 2)
+#define ETH_MACMIIAR_PASHIFT     (11)
+#define ETH_MACMIIAR_MRSHIFT     (6)
+#define ETH_MACMIIAR_MW          (1UL << 1)
+#define ETH_MACMIIAR_MB          (1UL << 0)
+#define ETH_MACFFR_PM            (1UL << 0)
+#define ETH_DMABMR_SR            (1UL << 0)
+#define ETH_DMABMR_AAB           (1UL << 25)
+#define ETH_DMABMR_PBLSHIFT      (8)
+#define ETH_DMABMR_PBL           (0x1FUL << ETH_DMABMR_PBLSHIFT)
+#define ETH_DMAOMR_ST            (1UL << 13)
+#define ETH_DMAOMR_SR            (1UL << 1)
+#define ETH_DMAOMR_RSF           (1UL << 25)
+#define ETH_DMAOMR_TSF           (1UL << 21)
+#define ETH_DMAIER_NISE          (1UL << 16)
+
+#define ETH_PHY_ADDR_DEFAULT     (0)
+#define ETH_PHY_BCR              (0)
+#define ETH_PHY_BCR_ANEN         (1UL << 12)
+#define ETH_PHY_BCR_SR           (1UL << 0)
+#define ETH_PHY_ANAR             (4)
+#define ETH_PHY_ANAR_100BASETXFD (1UL << 8)
+#define ETH_PHY_ANAR_100BASETX   (1UL << 7)
+#define ETH_PHY_ANAR_10BASETXFD  (1UL << 6)
+#define ETH_PHY_ANAR_10BASETX    (1UL << 5)
+#define ETH_PHY_ANAR_SELDEFAULT  (0x0001)
+#define ETH_PHY_ISR              (29)
+#define ETH_PHY_IMR              (30)
+#define ETH_PHY_IMR_ANC          (1UL << 6)
+#define ETH_PHY_SCSR             (31)
+#define ETH_PHY_SCSR_SPEEDSHIFT  (2)
+#define ETH_PHY_SCSR_SPEED       (0x7UL << ETH_PHY_SCSR_SPEEDSHIFT)
+
+#define ETH_PHY_10BASETX         (0b001)
+#define ETH_PHY_10BASETXFD       (0b101)
+#define ETH_PHY_100BASETX        (0b010)
+#define ETH_PHY_100BASETXFD      (0b110)
 
 typedef volatile struct {
   uint32_t MACCR;
@@ -64,5 +105,15 @@ typedef volatile struct {
 } eth_reg_t;
 
 #define ETH ((eth_reg_t *)ETHERNET_BASE)
+
+typedef volatile struct {
+  uint32_t TDES0;
+  uint32_t TDES1;
+  uint32_t TDES2;
+  uint32_t TDES3;
+} eth_des_t;
+
+#define ETH_TXDL_SIZE (1536)
+#define ETH_RXDL_SIZE (1536)
 
 void eth_init();

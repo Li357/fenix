@@ -17,19 +17,17 @@
 #define UART7_CLK_BIT    (1UL << 30)
 #define UART8_CLK_BIT    (1UL << 31)
 
-#define UART_INIT(usart, apb)   \
-  {                             \
-    apb |= usart##_CLK_BIT;     \
-    gpio_pin_init(usart##_TX);  \
-    gpio_pin_init(usart##_RX);  \
-    gpio_pin_init(usart##_CTS); \
-    gpio_pin_init(usart##_RTS); \
+#define UART_INIT(usart, apb)                     \
+  {                                               \
+    apb |= usart##_CLK_BIT;                       \
+    gpio_afpin_init(usart##_TX, GPIO_VHIGHSPEED); \
+    gpio_afpin_init(usart##_RX, GPIO_VHIGHSPEED); \
   }
 
-#define USART_INIT(usart, apb) \
-  {                            \
-    UART_INIT(usart, apb);     \
-    gpio_pin_init(usart##_CK); \
+#define USART_INIT(usart, apb)                    \
+  {                                               \
+    UART_INIT(usart, apb);                        \
+    gpio_afpin_init(usart##_CK, GPIO_VHIGHSPEED); \
   }
 
 typedef volatile struct {

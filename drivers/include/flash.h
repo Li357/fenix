@@ -1,3 +1,5 @@
+#pragma once
+
 #include "stm32f7.h"
 
 #define FLASH_ACR_PRFTEN (1UL << 8)

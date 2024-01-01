@@ -51,9 +51,6 @@ typedef enum {
   GPIO_PUPDRES,
 } gpio_pupd_t;
 
-void gpio_pin_init(gpio_pin_t pin);
-void gpio_pin_set_mode(gpio_pin_t pin, gpio_mode_t mode);
-void gpio_pin_set_output_type(gpio_pin_t pin, gpio_output_type_t type);
-void gpio_pin_set_speed(gpio_pin_t pin, gpio_output_speed_t speed);
-void gpio_pin_set_pupd(gpio_pin_t pin, gpio_pupd_t pupd);
-void gpio_pin_set_alt_func(gpio_pin_t pin, uint8_t af);
+void gpio_pin_init(gpio_pin_t pin, gpio_mode_t mode, gpio_output_type_t type,
+                   gpio_output_speed_t speed, gpio_pupd_t pupd);
+void gpio_afpin_init(gpio_pin_t pin, gpio_output_speed_t speed);
