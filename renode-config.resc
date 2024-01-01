@@ -4,7 +4,7 @@ mach create
 machine LoadPlatformDescription @platforms/boards/stm32f7_discovery-bb.repl
 
 sysbus LogPeripheralAccess sysbus.rcc
-sysbus LogPeripheralAccess sysbus.gpioPortA
+sysbus LogPeripheralAccess sysbus.nvic
 sysbus LogPeripheralAccess sysbus.ethernet
 
 sysbus LoadELF $bin
