@@ -16,6 +16,8 @@ static __attribute__((aligned(4))) eth_des_t RXDL[ETH_RX_BUFFER_NUM];
 static eth_des_t *currTXD;
 static eth_des_t *currRXD;
 
+static eth_receive_frame_cb_t _eth_receive_frame_cb;
+
 volatile int _eth_received_frame;
 
 void eth_phy_write(uint8_t address, uint8_t reg, uint16_t value) {
@@ -166,10 +168,8 @@ void eth_init() {
   ETH->DMAOMR |= ETH_DMAOMR_ST | ETH_DMAOMR_SR;
 }
 
-void eth_process_frame(uint8_t *frame, size_t len) {
-  puts("Frame: ");
-  for (size_t i = 0; i < len; i++, frame++) printf("%02x", *frame);
-  puts("\n");
+void eth_on_receive_frame(eth_receive_frame_cb_t cb) {
+  _eth_receive_frame_cb = cb;
 }
 
 eth_err_rx_t eth_receive_frame() {
@@ -195,7 +195,7 @@ eth_err_rx_t eth_receive_frame() {
   uint32_t length = (currRXD->DES0 & ETH_RDES0_FL) >> ETH_RDES0_FLSHIFT;
   uint8_t temp[ETH_TX_BUFFER_SIZE];
   memcpy(temp, (uint8_t *)currRXD->DES2, length);
-  eth_process_frame(temp, length);
+  if (_eth_receive_frame_cb) _eth_receive_frame_cb(temp, length);
 
 eth_rx_invalid_frame:
   // Give the invalid descriptor back to the DMA to use and move on

@@ -5,12 +5,19 @@
 #include "usart.h"
 #include "util.h"
 
+void on_receive_frame(uint8_t *frame, size_t len) {
+  puts("Frame: ");
+  for (size_t i = 0; i < len; i++, frame++) printf("%02x", *frame);
+  puts("\n");
+}
+
 int main() {
   usart_init(USART1, 115200);
 
   puts("Hello from Fenix!\n");
 
   eth_init();
+  eth_on_receive_frame(on_receive_frame);
 
   while (1) {
     delay(1000);

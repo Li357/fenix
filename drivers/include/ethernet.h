@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stddef.h>
 #include "stm32f7.h"
 
 #define ETH_MACCR_FESSHIFT       (14)
@@ -125,6 +126,9 @@ typedef enum {
   ETH_ERR_INVALID_FRAME,
 } eth_err_rx_t;
 
+typedef void (*eth_receive_frame_cb_t)(uint8_t *frame, size_t len);
+
 extern volatile int _eth_received_frame;
 void eth_init();
 eth_err_rx_t eth_receive_frame();
+void eth_on_receive_frame(eth_receive_frame_cb_t cb);
