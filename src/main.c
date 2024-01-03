@@ -9,15 +9,14 @@ int main() {
   usart_init(USART1, 115200);
 
   puts("Hello from Fenix!\n");
-  printf("MMC: %d, PTPT: %d, DMABMR: %d\n", offsetof(struct eth_reg_t, _MMC),
-         offsetof(struct eth_reg_t, _PTPT), offsetof(struct eth_reg_t, DMABMR));
 
   eth_init();
 
   while (1) {
-    if (received) {
-      puts("Ethernet frame received!\n");
-      received = 0;
+    delay(1000);
+    if (_eth_received_frame) {
+      while (eth_receive_frame() != ETH_ERR_EMPTY) {}
+      _eth_received_frame = 0;
     }
   }
 

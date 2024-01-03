@@ -21,6 +21,7 @@
 #define ETH_DMAOMR_TSF           (1UL << 21)
 #define ETH_DMAIER_NISE          (1UL << 16)
 #define ETH_DMASR_RS             (1UL << 6)
+#define ETH_DMASR_RBUS           (1UL << 7)
 
 #define ETH_PHY_ADDR_DEFAULT     (0)
 #define ETH_PHY_BCR              (0)
@@ -95,15 +96,35 @@ typedef volatile struct eth_reg_t {
 #define ETH ((eth_reg_t *)ETHERNET_BASE)
 
 typedef volatile struct {
-  uint32_t TDES0;
-  uint32_t TDES1;
-  uint32_t TDES2;
-  uint32_t TDES3;
+  uint32_t DES0;
+  uint32_t DES1;
+  uint32_t DES2;
+  uint32_t DES3;
 } eth_des_t;
 
-#define ETH_TXDL_SIZE (1536)
-#define ETH_RXDL_SIZE (1536)
+// Arbitrary number of buffers to fit 802.3 packets of at most 1536 bytes
+#define ETH_TX_BUFFER_NUM  (4)
+#define ETH_TX_BUFFER_SIZE (1536)
+#define ETH_RX_BUFFER_NUM  (4)
+#define ETH_RX_BUFFER_SIZE (1536)
 
-extern int received;
+#define ETH_TDES0_IC       (1UL << 30)
+#define ETH_TDES0_TCH      (1UL << 20)
+#define ETH_RDES0_LS       (1UL << 9)
+#define ETH_RDES0_FS       (1UL << 8)
+#define ETH_RDES0_RCH      (1UL << 14)
+#define ETH_RDES0_ES       (1UL << 15)
+#define ETH_RDES0_FLSHIFT  (16)
+#define ETH_RDES0_FL       (0x3FFF << ETH_RDES0_FLSHIFT)
+#define ETH_RDES0_OWN      (1UL << 31)
+#define ETH_RDES1_RBS1     (0x1FFFUL)
 
+typedef enum {
+  ETH_ERR_NONE,
+  ETH_ERR_EMPTY,
+  ETH_ERR_INVALID_FRAME,
+} eth_err_rx_t;
+
+extern volatile int _eth_received_frame;
 void eth_init();
+eth_err_rx_t eth_receive_frame();
