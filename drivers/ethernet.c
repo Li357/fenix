@@ -7,10 +7,8 @@
 #include "rcc.h"
 #include "syscfg.h"
 
-static __attribute__((aligned(4)))
-uint8_t TXB[ETH_TX_BUFFER_NUM][ETH_TX_BUFFER_SIZE];
-static __attribute__((aligned(4)))
-uint8_t RXB[ETH_RX_BUFFER_NUM][ETH_RX_BUFFER_SIZE];
+static __attribute__((aligned(4))) uint8_t TXB[ETH_TX_BUFFER_NUM][ETH_TX_BUFFER_SIZE];
+static __attribute__((aligned(4))) uint8_t RXB[ETH_RX_BUFFER_NUM][ETH_RX_BUFFER_SIZE];
 static __attribute__((aligned(4))) eth_des_t TXDL[ETH_TX_BUFFER_NUM];
 static __attribute__((aligned(4))) eth_des_t RXDL[ETH_RX_BUFFER_NUM];
 static eth_des_t *currTXD;
@@ -23,8 +21,8 @@ volatile int _eth_received_frame;
 void eth_phy_write(uint8_t address, uint8_t reg, uint16_t value) {
   // Note we implicitly have clock range to be HCLK / 42 <= 2.5MHz
   ETH->MACMIIDR = value;
-  ETH->MACMIIAR |= (address << ETH_MACMIIAR_PASHIFT) |
-                   (reg << ETH_MACMIIAR_MRSHIFT) | ETH_MACMIIAR_MW;
+  ETH->MACMIIAR |=
+      (address << ETH_MACMIIAR_PASHIFT) | (reg << ETH_MACMIIAR_MRSHIFT) | ETH_MACMIIAR_MW;
 
 #ifndef DEBUG
   // Wait until write finished
@@ -33,8 +31,7 @@ void eth_phy_write(uint8_t address, uint8_t reg, uint16_t value) {
 }
 
 uint16_t eth_phy_read(uint8_t address, uint8_t reg) {
-  ETH->MACMIIAR |=
-      (address << ETH_MACMIIAR_PASHIFT) | (reg << ETH_MACMIIAR_MRSHIFT);
+  ETH->MACMIIAR |= (address << ETH_MACMIIAR_PASHIFT) | (reg << ETH_MACMIIAR_MRSHIFT);
 #ifndef DEBUG
   while (ETH->MACMIIAR & ETH_MACMIIAR_MB) {}
 #endif
@@ -104,17 +101,15 @@ void eth_init() {
   SYSCFG->PMC |= SYSCFG_PMC_MII_RMII_SEL;
 
   // Enable ethernet TX/RX and MAC clock
-  RCC->AHB1ENR |=
-      RCC_AHB1ENR_ETHMACTXEN | RCC_AHB1ENR_ETHMACRXEN | RCC_AHB1ENR_ETHMACEN;
+  RCC->AHB1ENR |= RCC_AHB1ENR_ETHMACTXEN | RCC_AHB1ENR_ETHMACRXEN | RCC_AHB1ENR_ETHMACEN;
 
   // Perform a software reset
   eth_reset();
 
   // Set PHY auto-negotiation advertisement types
   eth_phy_write(ETH_PHY_ADDR_DEFAULT, ETH_PHY_ANAR,
-                ETH_PHY_ANAR_100BASETXFD | ETH_PHY_ANAR_100BASETX |
-                    ETH_PHY_ANAR_10BASETXFD | ETH_PHY_ANAR_10BASETX |
-                    ETH_PHY_ANAR_SELDEFAULT);
+                ETH_PHY_ANAR_100BASETXFD | ETH_PHY_ANAR_100BASETX | ETH_PHY_ANAR_10BASETXFD |
+                    ETH_PHY_ANAR_10BASETX | ETH_PHY_ANAR_SELDEFAULT);
 
   // Enable auto-negotiation and its interrupt
   eth_phy_write(ETH_PHY_ADDR_DEFAULT, ETH_PHY_BCR, ETH_PHY_BCR_ANEN);
@@ -122,25 +117,21 @@ void eth_init() {
 
 #ifndef DEBUG
   // Wait for auto-negotiation to finish
-  while (!(eth_phy_read(ETH_PHY_ADDR_DEFAULT, ETH_PHY_ISR) & ETH_PHY_IMR_ANC)) {
-  }
+  while (!(eth_phy_read(ETH_PHY_ADDR_DEFAULT, ETH_PHY_ISR) & ETH_PHY_IMR_ANC)) {}
 #endif
 
 #ifndef DEBUG
-  uint16_t speed =
-      (eth_phy_read(ETH_PHY_ADDR_DEFAULT, ETH_PHY_SCSR) & ETH_PHY_SCSR_SPEED) >>
-      ETH_PHY_SCSR_SPEEDSHIFT;
+  uint16_t speed = (eth_phy_read(ETH_PHY_ADDR_DEFAULT, ETH_PHY_SCSR) & ETH_PHY_SCSR_SPEED) >>
+                   ETH_PHY_SCSR_SPEEDSHIFT;
 #else
   uint16_t speed = ETH_PHY_100BASETXFD;
 #endif
 
-  uint32_t full_duplex =
-      speed == ETH_PHY_10BASETXFD || speed == ETH_PHY_100BASETXFD;
-  uint32_t fast = speed == ETH_PHY_100BASETX || speed == ETH_PHY_100BASETXFD;
+  uint32_t full_duplex = speed == ETH_PHY_10BASETXFD || speed == ETH_PHY_100BASETXFD;
+  uint32_t fast        = speed == ETH_PHY_100BASETX || speed == ETH_PHY_100BASETXFD;
 
   // Set duplex mode and fast ethernet status
-  ETH->MACCR |=
-      (full_duplex << ETH_MACCR_DMSHIFT) | (fast << ETH_MACCR_FESSHIFT);
+  ETH->MACCR |= (full_duplex << ETH_MACCR_DMSHIFT) | (fast << ETH_MACCR_FESSHIFT);
 
   // Enable store-and-forward
   ETH->DMAOMR |= ETH_DMAOMR_RSF | ETH_DMAOMR_TSF;
@@ -215,4 +206,3 @@ void _eth_handler() {
     _eth_received_frame = 1;
   }
 }
-

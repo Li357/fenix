@@ -59,4 +59,3 @@ typedef volatile struct {
 } rcc_reg_t;
 
 #define RCC ((rcc_reg_t *)RCC_BASE)
-
