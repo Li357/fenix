@@ -24,14 +24,18 @@ void eth_phy_write(uint8_t address, uint8_t reg, uint16_t value) {
   ETH->MACMIIAR |= (address << ETH_MACMIIAR_PASHIFT) |
                    (reg << ETH_MACMIIAR_MRSHIFT) | ETH_MACMIIAR_MW;
 
+#ifndef DEBUG
   // Wait until write finished
-  // while (ETH->MACMIIAR & ETH_MACMIIAR_MB) {}
+  while (ETH->MACMIIAR & ETH_MACMIIAR_MB) {}
+#endif
 }
 
 uint16_t eth_phy_read(uint8_t address, uint8_t reg) {
   ETH->MACMIIAR |=
       (address << ETH_MACMIIAR_PASHIFT) | (reg << ETH_MACMIIAR_MRSHIFT);
-  // while (ETH->MACMIIAR & ETH_MACMIIAR_MB) {}
+#ifndef DEBUG
+  while (ETH->MACMIIAR & ETH_MACMIIAR_MB) {}
+#endif
   return ETH->MACMIIDR;
 }
 
@@ -45,7 +49,9 @@ void eth_reset() {
 
   // Reset the PHY
   eth_phy_write(ETH_PHY_ADDR_DEFAULT, ETH_PHY_BCR, ETH_PHY_BCR_SR);
-  // while (eth_phy_read(ETH_PHY_ADDR_DEFAULT, ETH_PHY_BCR) & ETH_PHY_BCR_SR) {}
+#ifndef DEBUG
+  while (eth_phy_read(ETH_PHY_ADDR_DEFAULT, ETH_PHY_BCR) & ETH_PHY_BCR_SR) {}
+#endif
 }
 
 void eth_init_descriptor_lists() {
@@ -112,14 +118,19 @@ void eth_init() {
   eth_phy_write(ETH_PHY_ADDR_DEFAULT, ETH_PHY_BCR, ETH_PHY_BCR_ANEN);
   eth_phy_write(ETH_PHY_ADDR_DEFAULT, ETH_PHY_IMR, ETH_PHY_IMR_ANC);
 
+#ifndef DEBUG
   // Wait for auto-negotiation to finish
-  // while (!(eth_phy_read(ETH_PHY_ADDR_DEFAULT, ETH_PHY_ISR) &
-  // ETH_PHY_IMR_ANC)) {
-  // }
+  while (!(eth_phy_read(ETH_PHY_ADDR_DEFAULT, ETH_PHY_ISR) & ETH_PHY_IMR_ANC)) {
+  }
+#endif
 
-  uint16_t speed = ETH_PHY_100BASETXFD; /*
-       (eth_phy_read(ETH_PHY_ADDR_DEFAULT, ETH_PHY_SCSR) & ETH_PHY_SCSR_SPEED)
-       >> ETH_PHY_SCSR_SPEEDSHIFT;*/
+#ifndef DEBUG
+  uint16_t speed =
+      (eth_phy_read(ETH_PHY_ADDR_DEFAULT, ETH_PHY_SCSR) & ETH_PHY_SCSR_SPEED) >>
+      ETH_PHY_SCSR_SPEEDSHIFT;
+#else
+  uint16_t speed = ETH_PHY_100BASETXFD;
+#endif
 
   uint32_t full_duplex =
       speed == ETH_PHY_10BASETXFD || speed == ETH_PHY_100BASETXFD;

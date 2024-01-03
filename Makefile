@@ -24,7 +24,7 @@ ASFLAGS = $(MCU) $(COMMONFLAGS)
 CFLAGS += $(MCU) $(C_INCLUDES) $(COMMONFLAGS)
 
 ifeq ($(DEBUG), 1)
-	CFLAGS += -g -gdwarf-2
+	CFLAGS += -g -gdwarf-2 -DDEBUG
 endif
 
 LDSCRIPT = link.ld
