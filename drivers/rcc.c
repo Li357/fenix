@@ -4,8 +4,8 @@
 #include "systick.h"
 
 void _system_init() {
-  // Enable flash instruction prefetch
-  FLASH->ACR |= FLASH_ACR_PRFTEN;
+  // Enable flash instruction prefetch and set latency
+  FLASH->ACR |= FLASH_ACR_PRFTEN | FLASH_LATENCY;
 
   // Set PLL factors from config.h
   RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLP | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLM);
@@ -21,7 +21,6 @@ void _system_init() {
   RCC->CFGR |= APB2_PRE << RCC_CFGR_PPRE2SHIFT;
   RCC->CFGR |= AHB_PRE << RCC_CFGR_HPRESHIFT;
 
-  // Enable SYSCFG for systick and tick every 1ms
+  // Enable SYSCFG for systick
   RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
-  systick_init(SYS_CLOCK / 1000);
 }

@@ -39,3 +39,4 @@
 #define PPB_BASE      (0xE000E000UL)
 #define SYST_BASE     (PPB_BASE + 0x10UL)
 #define NVIC_BASE     (PPB_BASE + 0x100UL)
+#define SCB_BASE      (PPB_BASE + 0xD00UL)

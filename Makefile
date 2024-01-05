@@ -4,7 +4,7 @@ DEBUG = 1
 
 BUILD_DIR = build
 
-C_SOURCES = drivers/gpio.c drivers/usart.c drivers/nvic.c drivers/ethernet.c drivers/systick.c drivers/rcc.c src/syscall.c src/main.c src/util.c
+C_SOURCES = drivers/gpio.c drivers/usart.c drivers/nvic.c drivers/ethernet.c drivers/systick.c drivers/rcc.c src/syscall.c src/main.c src/kernel.c src/list.c
 C_INCLUDES = -Idrivers/include -Isrc/include
 ASM_SOURCES = bootloader.s
 PREFIX = arm-none-eabi-
@@ -24,7 +24,7 @@ ASFLAGS = $(MCU) $(COMMONFLAGS)
 CFLAGS += $(MCU) $(C_INCLUDES) $(COMMONFLAGS)
 
 ifeq ($(DEBUG), 1)
-	CFLAGS += -g -gdwarf-2 -DDEBUG
+	CFLAGS += -g3 -gdwarf-5 -DDEBUG
 endif
 
 LDSCRIPT = link.ld

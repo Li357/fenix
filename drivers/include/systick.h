@@ -14,6 +14,4 @@ typedef volatile struct {
 
 #define SYST ((systick_reg_t *)SYST_BASE)
 
-extern volatile uint32_t _systicks;
-
 void systick_init(uint32_t ticks);

@@ -10,14 +10,22 @@
  * f_VCOi = HSI / PLL_M <= 2MHz * f_VCOo = f_VCOi * PLL_N with 100MHz <= f_VCOo
  * <= 432MHz f_sys  = f_VCOo / PLL_P <= 216MHz with PLL_P = 2, 4, 6, 8
  *
- * We'll target 100MHz = HSI / 16 * 100 / 2 for now
- *
+ * We'll target 100MHz = HSI / 16 * 100 / 2 for now, at 3.3V giving a latency
+ * of 3 wait states
  */
 
-#define PLL_M     (16)
-#define PLL_N     (200)
-#define PLL_P     (2)
-#define SYS_CLOCK (BASE_CLOCK / PLL_M * PLL_N / PLL_P)
+#define PLL_M         (16)
+#define PLL_N         (200)
+#define PLL_P         (2)
+#define SYS_CLOCK     (BASE_CLOCK / PLL_M * PLL_N / PLL_P)
+#define FLASH_LATENCY (3)
+
+/* Tick frequency for RTOS */
+#define KERNEL_TICK_HZ            (1000)
+#define KERNEL_PREEMPT_TICKS      (10)
+#define KERNEL_MAX_PRIORITY       (1)
+#define KERNEL_MIN_PRIORITY       (255)
+#define KERNEL_DEFAULT_STACK_SIZE (100)
 
 /*
  * We also have scalers for the AHB1/2, APB1/2 clocks:
