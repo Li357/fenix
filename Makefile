@@ -25,6 +25,8 @@ CFLAGS += $(MCU) $(C_INCLUDES) $(COMMONFLAGS)
 
 ifeq ($(DEBUG), 1)
 	CFLAGS += -g3 -gdwarf-5 -DDEBUG
+else
+	CFLAGS += -O3
 endif
 
 LDSCRIPT = link.ld

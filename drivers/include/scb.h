@@ -4,6 +4,7 @@
 
 #define SCB_SHPR3_SYSTICKSHIFT (24)
 #define SCB_SHPR3_PENDSVSHIFT  (16)
+#define SCB_ICSR_PENDSVSET     (1UL << 28)
 
 typedef struct {
   uint32_t CPUID;

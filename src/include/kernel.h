@@ -5,7 +5,9 @@
 #include "list.h"
 #include "stm32f7.h"
 
-#define MAX_PRIORITIES (5)
+#define MAX_PRIORITIES           (5)
+#define KERNEL_DEFAULT_EPSR      (0x01000000UL)
+#define KERNEL_DEFAULT_EXCRETURN (0xFFFFFFFDUL)
 
 typedef void (*task_func_t)();
 
@@ -16,7 +18,10 @@ typedef struct {
   uint32_t priority;
   list_item_t list_item;
 } task_t;
-
 void task_init(task_t *task, task_func_t func, uint32_t priority, uint32_t *stack,
                size_t stack_size);
-void kernel_init(uint32_t cycles_per_tick, uint32_t ticks_per_task);
+void task_setready(task_t *task);
+void task_yield();
+void kernel_init();
+void kernel_start();
+void kernel_delay();

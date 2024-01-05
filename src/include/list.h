@@ -15,3 +15,4 @@ typedef struct {
 
 void list_init(list_t *l);
 void list_insert_end(list_t *l, list_item_t *item);
+list_item_t *list_next(list_t *l);

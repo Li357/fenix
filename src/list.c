@@ -1,4 +1,6 @@
 #include "list.h"
+#include <assert.h>
+#include <stdbool.h>
 #include <stddef.h>
 
 void list_init(list_t *l) {
@@ -7,12 +9,27 @@ void list_init(list_t *l) {
 }
 
 void list_insert_end(list_t *l, list_item_t *item) {
+  assert(l != NULL);
   if (l->head == NULL) {
-    l->head = item;
+    assert(l->length == 0);
+    item->prev = item;
+    item->next = item;
+    l->head    = item;
   } else {
-    list_item_t *curr = l->head;
-    while (curr->next) curr = curr->next;
-    curr->next = item;
+    assert(l->length > 0);
+    item->prev    = l->head->prev;
+    l->head->prev = item;
+    item->next    = l->head;
+    assert(item->next == l->head);
+    assert(item == l->head->prev);
   }
   l->length++;
 }
+
+list_item_t *list_next(list_t *l) {
+  if (l->head == NULL) return NULL;
+  l->head = l->head->next;
+  assert(l->head != NULL);
+  return l->head;
+}
+

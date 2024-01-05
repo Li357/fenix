@@ -22,7 +22,7 @@
 
 /* Tick frequency for RTOS */
 #define KERNEL_TICK_HZ            (1000)
-#define KERNEL_PREEMPT_TICKS      (10)
+#define KERNEL_PREEMPT_TICKS      (2000)
 #define KERNEL_MAX_PRIORITY       (1)
 #define KERNEL_MIN_PRIORITY       (255)
 #define KERNEL_DEFAULT_STACK_SIZE (100)
