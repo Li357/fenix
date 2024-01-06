@@ -9,7 +9,7 @@ void list_init(list_t *l) {
 }
 
 void list_insert_end(list_t *l, list_item_t *item) {
-  assert(l != NULL);
+  assert(l != NULL && item != NULL);
   if (l->head == NULL) {
     assert(l->length == 0);
     item->prev = item;
@@ -23,10 +23,23 @@ void list_insert_end(list_t *l, list_item_t *item) {
     assert(item->next == l->head);
     assert(item == l->head->prev);
   }
+  item->container = l;
   l->length++;
 }
 
+void list_remove(list_t *l, list_item_t *item) {
+  assert(l != NULL && item != NULL);
+  assert(item->prev != NULL && item->next != NULL);
+  assert(item->container == l);
+  item->prev->next = item->next;
+  item->next->prev = item->prev;
+  if (item == item->container->head) item->container->head = NULL;
+  item->container->length--;
+  item->container = NULL;
+}
+
 list_item_t *list_next(list_t *l) {
+  assert(l != NULL);
   if (l->head == NULL) return NULL;
   l->head = l->head->next;
   assert(l->head != NULL);

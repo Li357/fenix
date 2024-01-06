@@ -3,6 +3,7 @@
 #include <string.h>
 #include "config.h"
 #include "gpio.h"
+#include "kernel.h"
 #include "nvic.h"
 #include "rcc.h"
 #include "syscfg.h"
@@ -14,9 +15,7 @@ static __attribute__((aligned(4))) eth_des_t RXDL[ETH_RX_BUFFER_NUM];
 static eth_des_t *currTXD;
 static eth_des_t *currRXD;
 
-static eth_receive_frame_cb_t _eth_receive_frame_cb;
-
-volatile int _eth_received_frame;
+extern task_t task_eth;
 
 void eth_phy_write(uint8_t address, uint8_t reg, uint16_t value) {
   // Note we implicitly have clock range to be HCLK / 42 <= 2.5MHz
@@ -148,8 +147,8 @@ void eth_init() {
   // Set MAC filter to be promiscuous for now
   ETH->MACFFR |= ETH_MACFFR_PM;
 
-  // Enable interrupt and set priority to 9, i.e. just below systick
-  nvic_set_priority(NVIC_IRQ_ETH, 9);
+  // Enable interrupt and set priority to 1
+  nvic_set_priority(NVIC_IRQ_ETH, 1);
   nvic_enable_irq(NVIC_IRQ_ETH);
 
   // Enable MAC TX/RX
@@ -159,11 +158,7 @@ void eth_init() {
   ETH->DMAOMR |= ETH_DMAOMR_ST | ETH_DMAOMR_SR;
 }
 
-void eth_on_receive_frame(eth_receive_frame_cb_t cb) {
-  _eth_receive_frame_cb = cb;
-}
-
-eth_err_rx_t eth_receive_frame() {
+eth_err_rx_t eth_receive_frame(uint8_t *frame, uint32_t *length) {
   eth_err_rx_t err = ETH_ERR_NONE;
   // If owned by DMA, then it's empty
   if (currRXD->DES0 & ETH_RDES0_OWN) {
@@ -183,10 +178,8 @@ eth_err_rx_t eth_receive_frame() {
     goto eth_rx_invalid_frame;
   }
 
-  uint32_t length = (currRXD->DES0 & ETH_RDES0_FL) >> ETH_RDES0_FLSHIFT;
-  uint8_t temp[ETH_TX_BUFFER_SIZE];
-  memcpy(temp, (uint8_t *)currRXD->DES2, length);
-  if (_eth_receive_frame_cb) _eth_receive_frame_cb(temp, length);
+  *length = (currRXD->DES0 & ETH_RDES0_FL) >> ETH_RDES0_FLSHIFT;
+  memcpy(frame, (uint8_t *)currRXD->DES2, *length);
 
 eth_rx_invalid_frame:
   // Give the invalid descriptor back to the DMA to use and move on
@@ -203,6 +196,6 @@ void _eth_handler() {
   // If we have a receive event
   if (ETH->DMASR & ETH_DMASR_RS) {
     ETH->DMASR &= ~ETH_DMASR_RS;
-    _eth_received_frame = 1;
+    task_setready(&task_eth);
   }
 }

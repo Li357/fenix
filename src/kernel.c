@@ -23,8 +23,6 @@
 #include "sys/select.h"
 #include "systick.h"
 
-void kernel_start_root_task();
-
 static volatile uint32_t _systicks;
 static volatile uint32_t _systick_next_preempt;
 
@@ -34,10 +32,10 @@ static task_t *_curr_task;
 static task_t _root_task;
 static uint32_t _root_stack[KERNEL_DEFAULT_STACK_SIZE];
 
-static void _root_task_func() {
+static void _root_task_func(void *param) {
   while (1) {
     kernel_delay(500);
-    puts("hi! from idle!\n");
+    puts("In idle!");
   }
 }
 
@@ -46,22 +44,24 @@ void kernel_delay(uint32_t ticks) {
   while (_systicks < until) {}
 }
 
-void task_init_stack(task_t *task) {
+void task_init_stack(task_t *task, void *task_param) {
   uint32_t *sp = task->sp;
-  sp--;
+  sp--;  // For some reason, the stack needs to be offset an additional word for correct exception
+         // exit stack calculation
   *sp = KERNEL_DEFAULT_EPSR;  // xPSR (EPSR needs to set Thumb bit)
   sp--;
   *sp = (uint32_t)task->func;  // PC
   sp--;
-  *sp = 0;  // LR
-  sp -= 5;
+  *sp = 0;                     // LR
+  sp -= 5;                     // r12, r3-r0
+  *sp = (uint32_t)task_param;  // task_param is r0
   sp--;
   *sp = KERNEL_DEFAULT_EXCRETURN;  // EXC_RETURN to thread mode from SVCall handler for r14
   sp -= 8;                         // r11-r4
   task->sp = sp;
 }
 
-void task_init(task_t *task, task_func_t func, uint32_t priority, uint32_t *stack,
+void task_init(task_t *task, task_func_t func, void *task_param, uint32_t priority, uint32_t *stack,
                size_t stack_size) {
   // sp grows down, and *stack is a pointer to the first element of the stack in contiguous
   // memory
@@ -69,15 +69,19 @@ void task_init(task_t *task, task_func_t func, uint32_t priority, uint32_t *stac
   task->stack_size = stack_size;
   task->func       = func;
   task->priority   = priority;
+  task->state      = TASK_SUSPENDED;
 
-  task->list_item.item = (void *)task;
-  task->list_item.prev = NULL;
-  task->list_item.next = NULL;
+  task->list_item.item      = (void *)task;
+  task->list_item.prev      = NULL;
+  task->list_item.next      = NULL;
+  task->list_item.container = NULL;
 
-  task_init_stack(task);
+  task_init_stack(task, task_param);
 }
 
 void task_setready(task_t *task) {
+  if (task->state == TASK_READY) return;
+  task->state = TASK_READY;
   list_insert_end(&_ready_tasklists[task->priority], &task->list_item);
 }
 
@@ -89,7 +93,7 @@ void kernel_init() {
   for (size_t i = 0; i < MAX_PRIORITIES; i++) list_init(&_ready_tasklists[i]);
 
   // Create the root idle task with lowest task priority
-  task_init(&_root_task, _root_task_func, MAX_PRIORITIES - 1, _root_stack,
+  task_init(&_root_task, _root_task_func, NULL, MAX_PRIORITIES - 1, _root_stack,
             KERNEL_DEFAULT_STACK_SIZE);
   task_setready(&_root_task);
   _curr_task = &_root_task;
@@ -131,6 +135,12 @@ void __attribute__((naked)) _svc_handler() {
   );
 }
 
+void task_suspend() {
+  _curr_task->state = TASK_SUSPENDED;
+  list_remove(&_ready_tasklists[_curr_task->priority], &_curr_task->list_item);
+  SCB->ICSR |= SCB_ICSR_PENDSVSET;
+}
+
 void task_yield() {
   SCB->ICSR |= SCB_ICSR_PENDSVSET;
 }
@@ -145,7 +155,6 @@ void kernel_pick_task() {
     }
   }
 }
-
 void __attribute__((naked)) _pendsv_handler() {
   asm volatile(
       "mrs r0, psp              \n"  // Save the psp since push/pop refers to msp here
