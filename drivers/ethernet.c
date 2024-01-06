@@ -4,6 +4,7 @@
 #include "config.h"
 #include "gpio.h"
 #include "kernel.h"
+#include "net.h"
 #include "nvic.h"
 #include "rcc.h"
 #include "syscfg.h"
@@ -15,6 +16,7 @@ static __attribute__((aligned(4))) eth_des_t RXDL[ETH_RX_BUFFER_NUM];
 static eth_des_t *currTXD;
 static eth_des_t *currRXD;
 
+extern uint8_t MAC[6];
 extern task_t task_eth;
 
 void eth_phy_write(uint8_t address, uint8_t reg, uint16_t value) {
@@ -151,15 +153,32 @@ void eth_init() {
   nvic_set_priority(NVIC_IRQ_ETH, 1);
   nvic_enable_irq(NVIC_IRQ_ETH);
 
-  // Enable MAC TX/RX
-  ETH->MACCR |= ETH_MACCR_TE | ETH_MACCR_RE;
+  // Enable MAC TX/RX with auto-pad and CRC
+  ETH->MACCR |= ETH_MACCR_TE | ETH_MACCR_RE | ETH_MACCR_APCS;
 
   // Start DMA TX/RX
   ETH->DMAOMR |= ETH_DMAOMR_ST | ETH_DMAOMR_SR;
 }
 
-eth_err_rx_t eth_receive_frame(uint8_t *frame, uint32_t *length) {
-  eth_err_rx_t err = ETH_ERR_NONE;
+eth_err_t eth_transmit_frame(uint8_t *frame, uint32_t len) {
+  if (len > ETH_TX_BUFFER_SIZE) return ETH_ERR_TOO_LONG;
+  if (currTXD->DES0 & ETH_TDES0_OWN) return ETH_ERR_BUSY;
+
+  memcpy((void *)currTXD->DES2, frame, (len + 3) & ~3UL);  // Align to nearest word
+  currTXD->DES0 |= ETH_TDES0_OWN | ETH_TDES0_FS | ETH_TDES0_LS;
+  currTXD->DES1 = len;
+  currTXD       = (eth_des_t *)currTXD->DES3;
+  if (currTXD->DES0 & ETH_TDES0_OWN) {
+    // TODO: notify that we're ready for another packet
+  }
+
+  ETH->DMASR &= ~ETH_DMASR_TBUS;
+  ETH->DMATPDR = 0;
+  return ETH_ERR_NONE;
+}
+
+eth_err_t eth_receive_frame(uint8_t *frame, uint32_t *len) {
+  eth_err_t err = ETH_ERR_NONE;
   // If owned by DMA, then it's empty
   if (currRXD->DES0 & ETH_RDES0_OWN) {
     err = ETH_ERR_EMPTY;
@@ -178,8 +197,8 @@ eth_err_rx_t eth_receive_frame(uint8_t *frame, uint32_t *length) {
     goto eth_rx_invalid_frame;
   }
 
-  *length = (currRXD->DES0 & ETH_RDES0_FL) >> ETH_RDES0_FLSHIFT;
-  memcpy(frame, (uint8_t *)currRXD->DES2, *length);
+  *len = (currRXD->DES0 & ETH_RDES0_FL) >> ETH_RDES0_FLSHIFT;
+  memcpy(frame, (uint8_t *)currRXD->DES2, *len);
 
 eth_rx_invalid_frame:
   // Give the invalid descriptor back to the DMA to use and move on
@@ -190,6 +209,20 @@ eth_rx_done:
   ETH->DMASR &= ~ETH_DMASR_RBUS;
   ETH->DMARPDR = 0;
   return err;
+}
+
+void eth_get_mac(uint8_t *mac) {
+#ifndef DEBUG
+  mac[0] = ETH->MACA0HR & 0x0000FF00UL;
+  mac[1] = ETH->MACA0HR & 0x000000FFUL;
+  mac[2] = ETH->MACA0LR & 0xFF000000UL;
+  mac[3] = ETH->MACA0LR & 0x00FF0000UL;
+  mac[4] = ETH->MACA0LR & 0x0000FF00UL;
+  mac[5] = ETH->MACA0LR & 0x000000FFUL;
+#else
+  // For some reason Renode can't get a valid MAC address
+  memcpy(mac, MAC, ETH_MAC_LENGTH);
+#endif
 }
 
 void _eth_handler() {

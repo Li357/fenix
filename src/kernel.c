@@ -33,10 +33,7 @@ static task_t _root_task;
 static uint32_t _root_stack[KERNEL_DEFAULT_STACK_SIZE];
 
 static void _root_task_func(void *param) {
-  while (1) {
-    kernel_delay(500);
-    puts("In idle!");
-  }
+  while (1) { task_yield(); }
 }
 
 void kernel_delay(uint32_t ticks) {

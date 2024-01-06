@@ -7,6 +7,7 @@
 #define ETH_MACCR_DMSHIFT        (11)
 #define ETH_MACCR_TE             (1UL << 3)
 #define ETH_MACCR_RE             (1UL << 2)
+#define ETH_MACCR_APCS           (1UL << 7)
 #define ETH_MACMIIAR_PASHIFT     (11)
 #define ETH_MACMIIAR_MRSHIFT     (6)
 #define ETH_MACMIIAR_MW          (1UL << 1)
@@ -22,6 +23,7 @@
 #define ETH_DMAOMR_TSF           (1UL << 21)
 #define ETH_DMAIER_NISE          (1UL << 16)
 #define ETH_DMASR_RS             (1UL << 6)
+#define ETH_DMASR_TBUS           (1UL << 2)
 #define ETH_DMASR_RBUS           (1UL << 7)
 
 #define ETH_PHY_ADDR_DEFAULT     (0)
@@ -113,10 +115,13 @@ typedef volatile struct {
 #define ETH_TDES0_TCH      (1UL << 20)
 #define ETH_RDES0_LS       (1UL << 9)
 #define ETH_RDES0_FS       (1UL << 8)
+#define ETH_TDES0_LS       (1UL << 29)
+#define ETH_TDES0_FS       (1UL << 28)
 #define ETH_RDES0_RCH      (1UL << 14)
 #define ETH_RDES0_ES       (1UL << 15)
 #define ETH_RDES0_FLSHIFT  (16)
 #define ETH_RDES0_FL       (0x3FFF << ETH_RDES0_FLSHIFT)
+#define ETH_TDES0_OWN      (1UL << 31)
 #define ETH_RDES0_OWN      (1UL << 31)
 #define ETH_RDES1_RBS1     (0x1FFFUL)
 
@@ -124,7 +129,11 @@ typedef enum {
   ETH_ERR_NONE,
   ETH_ERR_EMPTY,
   ETH_ERR_INVALID_FRAME,
-} eth_err_rx_t;
+  ETH_ERR_TOO_LONG,
+  ETH_ERR_BUSY,
+} eth_err_t;
 
 void eth_init();
-eth_err_rx_t eth_receive_frame();
+eth_err_t eth_transmit_frame(uint8_t *frame, uint32_t len);
+eth_err_t eth_receive_frame(uint8_t *frame, uint32_t *len);
+void eth_get_mac(uint8_t *mac);

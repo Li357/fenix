@@ -1,7 +1,7 @@
 #include <stddef.h>
 #include <stdio.h>
-#include "ethernet.h"
 #include "kernel.h"
+#include "net.h"
 #include "systick.h"
 #include "usart.h"
 
@@ -12,11 +12,7 @@ void task_eth_func(void *param) {
     uint8_t frame[ETH_RX_BUFFER_SIZE];
     uint32_t length;
 
-    while (eth_receive_frame(frame, &length) != ETH_ERR_EMPTY) {
-      puts("Frame: ");
-      for (size_t i = 0; i < length; i++) printf("%02x", frame[i]);
-      puts("\n");
-    }
+    while (eth_receive_frame(frame, &length) != ETH_ERR_EMPTY) { eth_process(frame, length); }
     task_suspend();
   }
 }
