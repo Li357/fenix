@@ -4,12 +4,11 @@
 #include <string.h>
 #include "ethernet.h"
 
-#define ntohs(x) ((x) << 8 | (x) >> 8)
+#define ntohs(x) (((x) & 0xFFUL) << 8 | ((x) & 0xFF00UL) >> 8)
 #define htons(x) ntohs(x)
 #define htonl(x) (__builtin_bswap32(x))
 
-static uint32_t IP = htonl(0xc0a80007);  // 192.168.0.7
-uint8_t MAC[6]     = {0xde, 0xad, 0xbe, 0xef, 0xbe, 0xef};
+static uint32_t IP = htonl(0xc0a800fe);  // 192.168.0.254
 
 static arp_record_t arp_table[ARP_TABLE_SIZE];
 
@@ -70,6 +69,61 @@ void arp_process(eth_hdr_t *eth_hdr) {
   }
 }
 
+uint16_t checksum(void *hdr, uint32_t len) {
+  uint32_t sum  = 0;
+  uint16_t *ptr = (uint16_t *)hdr;
+  while (len > 1) {
+    sum += *ptr;
+    len -= 2;
+    ptr++;
+  }
+  if (len == 1) sum += *(uint8_t *)ptr;
+  // Convert to ones-complement sum by adding in wrap around carry
+  while (sum >> 16) sum = (sum & 0xFFFFUL) + (sum >> 16);
+  return ~sum;
+}
+
+void icmpv4_reply(eth_hdr_t *eth_hdr, uint32_t len) {
+  ipv4_hdr_t *ip_hdr   = (ipv4_hdr_t *)eth_hdr->payload;
+  icmpv4_t *packet_hdr = (icmpv4_t *)ip_hdr->payload;
+
+  ip_hdr->dst_addr = ip_hdr->src_addr;
+  ip_hdr->src_addr = IP;
+
+  uint32_t hdr_len  = (ip_hdr->v_hdr_len & 0xF) * 4;
+  uint32_t icmp_len = ntohs(ip_hdr->len) - hdr_len;
+  packet_hdr->type  = ICMP_TYPE_ECHO_REPLY;
+  packet_hdr->code  = 0;
+  packet_hdr->csum  = 0;
+  // No need to convert to network byte order because checksum is endian-neutral
+  packet_hdr->csum = checksum(packet_hdr, icmp_len);
+
+  eth_send(eth_hdr->src_mac, eth_hdr, len);
+}
+
+void icmpv4_process(eth_hdr_t *eth_hdr, uint32_t len) {
+  ipv4_hdr_t *hdr  = (ipv4_hdr_t *)eth_hdr->payload;
+  icmpv4_t *packet = (icmpv4_t *)hdr->payload;
+  switch (packet->type) {
+    case ICMP_TYPE_ECHO_REQUEST:
+      icmpv4_reply(eth_hdr, len);
+      break;
+    default:
+      printf("Unsupported ICMP code: 0x%02x\n", packet->code);
+  }
+}
+
+void ip_process(eth_hdr_t *eth_hdr, uint32_t len) {
+  ipv4_hdr_t *hdr = (ipv4_hdr_t *)eth_hdr->payload;
+  switch (hdr->pro) {
+    case IP_PROTO_ICMP:
+      icmpv4_process(eth_hdr, len);
+      break;
+    default:
+      printf("Unsupported IP protocol: 0x%02x\n", hdr->pro);
+  }
+}
+
 void eth_send(uint8_t *mac, eth_hdr_t *hdr, uint32_t len) {
   memcpy(hdr->dst_mac, mac, ETH_MAC_LENGTH);
   eth_get_mac(hdr->src_mac);
@@ -85,7 +139,10 @@ void eth_process(uint8_t *frame, uint32_t len) {
     case ETH_ETHERTYPE_ARP:
       arp_process(hdr);
       break;
+    case ETH_ETHERTYPE_IPv4:
+      ip_process(hdr, len);
+      break;
     default:
-      printf("Received unsupported ethertype: %x\n", hdr->ether_type);
+      printf("Unsupported ethertype: 0x%04x\n", hdr->ether_type);
   }
 }

@@ -179,6 +179,7 @@ eth_err_t eth_transmit_frame(uint8_t *frame, uint32_t len) {
 
 eth_err_t eth_receive_frame(uint8_t *frame, uint32_t *len) {
   eth_err_t err = ETH_ERR_NONE;
+
   // If owned by DMA, then it's empty
   if (currRXD->DES0 & ETH_RDES0_OWN) {
     err = ETH_ERR_EMPTY;
@@ -212,17 +213,12 @@ eth_rx_done:
 }
 
 void eth_get_mac(uint8_t *mac) {
-#ifndef DEBUG
-  mac[0] = ETH->MACA0HR & 0x0000FF00UL;
-  mac[1] = ETH->MACA0HR & 0x000000FFUL;
-  mac[2] = ETH->MACA0LR & 0xFF000000UL;
-  mac[3] = ETH->MACA0LR & 0x00FF0000UL;
-  mac[4] = ETH->MACA0LR & 0x0000FF00UL;
-  mac[5] = ETH->MACA0LR & 0x000000FFUL;
-#else
-  // For some reason Renode can't get a valid MAC address
-  memcpy(mac, MAC, ETH_MAC_LENGTH);
-#endif
+  mac[0] = ETH->MACA0LR & 0x000000FFUL;
+  mac[1] = (ETH->MACA0LR & 0x0000FF00UL) >> 8;
+  mac[2] = (ETH->MACA0LR & 0x00FF0000UL) >> 16;
+  mac[3] = (ETH->MACA0LR & 0xFF000000UL) >> 24;
+  mac[4] = ETH->MACA0HR & 0x000000FFUL;
+  mac[5] = (ETH->MACA0HR & 0x0000FF00UL) >> 8;
 }
 
 void _eth_handler() {

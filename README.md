@@ -7,4 +7,17 @@ A bare-metal project on the STM32F756ZG Nucleo board for learning everything abo
 - How to read datasheets
 - How to write software drivers
 
-The goal is to write drivers for USART, I2C, ADC/DAC, timers, maybe a custom VGA controller (and separate board with a connector for ok-quality video out, or driver for LCD-TFT controller), maybe a custom Ethernet driver. Then some kind of RTOS or simple context switching with priorities + IPC to manage all these drivers and events.
+Currently comes with:
+- basic RTOS with context-switching between tasks inspired by FreeRTOS
+- USART driver for logging
+- Ethernet + ARP, ICMP support
+
+Notes:
+- Make sure you've got the ARM GCC toolchain (arm-none-eabi-) to build
+- Emulate with Renode (>= v1.14.0.6117 to fix an annoying Ethernet bug)
+- I'm working on macOS, so I needed the TUN/TAP kext (you can install Tunnelblick). There's also platform-specific bridging between `en0` and `tap0` to connect Renode to your host interface. The device names might be different for you - edit in `start.sh`
+
+Build debug with `make` and then run Renode with `sudo ./start.sh`. Currently the board has a hardcoded IP address 192.168.0.254:
+
+- ARP: `arping 192.168.0.254` -- you might need to `brew install arping` and add Homebrew's sbin to your path. The default MAC from Renode is `00:00:00:00:00:02`.
+- ICMP: `ping 192.168.0.254`

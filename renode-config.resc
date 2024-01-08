@@ -9,9 +9,10 @@ switch Start
 emulation CreateTap "tap0" "tap"
 connector Connect host.tap switch
 host.tap Start
+switch EnablePromiscuousMode sysbus.ethernet
 
-sysbus LogPeripheralAccess sysbus.rcc
-sysbus LogPeripheralAccess sysbus.nvic
+#sysbus LogPeripheralAccess sysbus.rcc
+#sysbus LogPeripheralAccess sysbus.nvic
 sysbus LogPeripheralAccess sysbus.ethernet
 
 sysbus LoadELF $bin
@@ -20,9 +21,4 @@ showAnalyzer sysbus.usart1
 
 machine StartGdbServer 3333
 
-# you need to run these in the renode window
-# hack since the MAC driver won't let you receive frames until you send one
-# https://github.com/renode/renode/issues/237
-allowPrivates true
-sysbus.ethernet packetSent true
-
+emulation LogToWireshark switch
