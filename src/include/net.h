@@ -22,7 +22,6 @@
 #define ICMP_TYPE_ECHO_REPLY   (0)
 #define ICMP_TYPE_ECHO_REQUEST (8)
 
-#define TCP_MAX_PORTS          (128)
 #define TCP_CONTROL_MASK       (0x3FUL)
 #define TCP_CONTROL_FIN        (1UL << 0)
 #define TCP_CONTROL_SYN        (1UL << 1)
@@ -98,19 +97,6 @@ typedef struct {
   uint16_t urgent_ptr;
   uint8_t payload[];
 } __attribute__((packed)) tcp_hdr_t;
-
-typedef enum {
-  TCP_LISTEN,
-  TCP_SYN_RECEIVED,
-  TCP_ESTABLISHED,
-} tcp_state_t;
-
-typedef struct {
-  uint32_t snd_next;
-  uint32_t snd_unack;
-  uint32_t rcv_next;
-  tcp_state_t state;
-} tcp_record_t;
 
 void eth_send(uint8_t *mac, eth_hdr_t *frame, uint32_t len);
 void eth_process(uint8_t *frame, uint32_t len);

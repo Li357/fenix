@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "ethernet.h"
+#include "socket.h"
 
 #define ntohs(x) (((x) & 0xFFUL) << 8 | ((x) & 0xFF00UL) >> 8)
 #define htons(x) ntohs(x)
@@ -12,7 +13,6 @@
 static uint32_t IP = htonl(0xc0a800fe);  // 192.168.0.254
 
 static arp_record_t arp_table[ARP_TABLE_SIZE];
-static tcp_record_t tcp_table[TCP_MAX_PORTS];
 
 bool arp_table_update(uint32_t ip, uint8_t *mac) {
   for (size_t i = 0; i < ARP_TABLE_SIZE; i++) {
@@ -121,8 +121,15 @@ void tcp_process(eth_hdr_t *eth_hdr, uint32_t len) {
   hdr->dst_port        = ntohs(hdr->dst_port);
   hdr->hdr_len_control = ntohs(hdr->hdr_len_control);
 
-  if (hdr->dst_port < 0 || hdr->dst_port >= TCP_MAX_PORTS) {
-    printf("Unsupported TCP port: %d\n", hdr->dst_port);
+  tcp_record_t *record = NULL;
+  for (size_t i = 0; i < SOCKET_MAX_CONNECTIONS; i++) {
+    if (tcp_table[i].local_port == hdr->dst_port && tcp_table[i].state != TCP_CLOSED) {
+      record = &tcp_table[i];
+      break;
+    }
+  }
+  if (record == NULL) {
+    printf("Dropped packet to closed port %d\n", hdr->dst_port);
     return;
   }
 
@@ -133,7 +140,6 @@ void tcp_process(eth_hdr_t *eth_hdr, uint32_t len) {
   ip_hdr->dst_addr = ip_hdr->src_addr;
   ip_hdr->src_addr = temp;
 
-  tcp_record_t *record = &tcp_table[hdr->dst_port];
   switch (record->state) {
     case TCP_LISTEN:
       if (hdr->hdr_len_control & TCP_CONTROL_RST) { return; }
