@@ -1,6 +1,5 @@
 #include "ethernet.h"
-#include <stdio.h>
-#include <string.h>
+#include <stdio.h> #include <string.h>
 #include "config.h"
 #include "gpio.h"
 #include "kernel.h"
