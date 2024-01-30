@@ -6,16 +6,15 @@
 #include "systick.h"
 #include "usart.h"
 
-uint32_t task_eth_stack[500];
-task_t task_eth;
-void task_eth_func(void *param) {
+task_t socket_task;
+uint32_t socket_task_stack[500];
+void socket_task_func(void *param) {
+  int sd = socket_open(1337);
+  socket_listen(sd);
   while (1) {
-    uint8_t frame[ETH_RX_BUFFER_SIZE];
-    uint32_t length;
-
-    while (eth_receive_frame(frame, &length) != ETH_ERR_EMPTY) { eth_process(frame, length); }
-    task_suspend();
+    if (socket_accept(sd)) { puts("here!"); }
   }
+  task_yield();
 }
 
 int main() {
@@ -25,11 +24,12 @@ int main() {
 
   kernel_init();
 
-  task_init(&task_eth, task_eth_func, NULL, 0, task_eth_stack, 100);
-  int fd = socket_init(80);
-  socket_listen(fd);
-
+  net_init();
   eth_init();
+
+  task_init(&socket_task, socket_task_func, NULL, 0, socket_task_stack, 500);
+  task_setready(&socket_task);
+
   kernel_start();
 
   return 0;

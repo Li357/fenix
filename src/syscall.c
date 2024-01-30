@@ -1,6 +1,5 @@
 #include <sys/stat.h>
 #include <unistd.h>
-#include "socket.h"
 #include "usart.h"
 
 int _write(int fd, char *ptr, int len) {
@@ -13,7 +12,6 @@ int _read(int fd, char *ptr, int len) {
 }
 
 int _close(int fd) {
-  if (fd >= SOCKET_FD_BASE) { return socket_close(fd); }
   return -1;
 }
 

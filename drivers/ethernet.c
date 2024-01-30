@@ -17,7 +17,7 @@ static eth_des_t *currTXD;
 static eth_des_t *currRXD;
 
 extern uint8_t MAC[6];
-extern task_t task_eth;
+extern task_t net_task;
 
 void eth_phy_write(uint8_t address, uint8_t reg, uint16_t value) {
   // Note we implicitly have clock range to be HCLK / 42 <= 2.5MHz
@@ -225,6 +225,6 @@ void _eth_handler() {
   // If we have a receive event
   if (ETH->DMASR & ETH_DMASR_RS) {
     ETH->DMASR &= ~ETH_DMASR_RS;
-    task_setready(&task_eth);
+    kernel_sem_give(&eth_event);
   }
 }

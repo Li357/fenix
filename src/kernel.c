@@ -4,8 +4,7 @@
  * - Tasks are created with static stack size and given priority, and execute in
  *   thread mode
  * - Scheduler preempts in a number of ticks and always chooses the highest priority task
- *   at time of preemption
- *
+ *   at time of preemption *
  * - SVC is used to start the root idle task, whose stack is setup to look like a task that was
  *   context-switched out of and will be switched into
  * - SysTick increments ticks and calls a PendSV if a task needs to be preempted
@@ -39,6 +38,10 @@ static void _root_task_func(void *param) {
 void kernel_delay(uint32_t ticks) {
   uint32_t until = _systicks + ticks;
   while (_systicks < until) {}
+}
+
+void kernel_set_basepri(uint32_t priority) {
+  asm volatile("msr basepri, %0" ::"r"(priority) : "memory");
 }
 
 void task_init_stack(task_t *task, void *task_param) {
@@ -78,12 +81,10 @@ void task_init(task_t *task, task_func_t func, void *task_param, uint32_t priori
 
 void task_setready(task_t *task) {
   if (task->state == TASK_READY) return;
+  kernel_set_basepri(KERNEL_MAX_PRIORITY);
   task->state = TASK_READY;
   list_insert_end(&_ready_tasklists[task->priority], &task->list_item);
-}
-
-void kernel_set_basepri(uint32_t priority) {
-  asm volatile("msr basepri, %0" ::"r"(priority) : "memory");
+  kernel_set_basepri(0);
 }
 
 void kernel_init() {
@@ -133,9 +134,12 @@ void __attribute__((naked)) _svc_handler() {
 }
 
 void task_suspend() {
+  if (_curr_task->state == TASK_SUSPENDED) return;
+  kernel_set_basepri(KERNEL_MAX_PRIORITY);
   _curr_task->state = TASK_SUSPENDED;
   list_remove(&_ready_tasklists[_curr_task->priority], &_curr_task->list_item);
   SCB->ICSR |= SCB_ICSR_PENDSVSET;
+  kernel_set_basepri(0);
 }
 
 void task_yield() {

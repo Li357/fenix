@@ -3,16 +3,31 @@
 #include <stdio.h>
 #include <string.h>
 #include "ethernet.h"
+#include "kernel.h"
 #include "socket.h"
 
-#define ntohs(x) (((x) & 0xFFUL) << 8 | ((x) & 0xFF00UL) >> 8)
-#define htons(x) ntohs(x)
-#define ntohl(x) (__builtin_bswap32(x))
-#define htonl(x) ntohl(x)
+#define ntohs(x)       (((x) & 0xFFUL) << 8 | ((x) & 0xFF00UL) >> 8)
+#define htons(x)       ntohs(x)
+#define ntohl(x)       (__builtin_bswap32(x))
+#define htonl(x)       ntohl(x)
+
+#define NET_STACK_SIZE (500)
 
 static uint32_t IP = htonl(0xc0a800fe);  // 192.168.0.254
 
 static arp_record_t arp_table[ARP_TABLE_SIZE];
+
+uint32_t net_task_stack[NET_STACK_SIZE];
+task_t net_task;
+void net_task_func(void *param) {
+  uint8_t frame[ETH_RX_BUFFER_SIZE];
+  uint32_t length;
+
+  while (1) {
+    while (eth_receive_frame(frame, &length) != ETH_ERR_EMPTY) { eth_process(frame, length); }
+    task_suspend();
+  }
+}
 
 bool arp_table_update(uint32_t ip, uint8_t *mac) {
   for (size_t i = 0; i < ARP_TABLE_SIZE; i++) {
@@ -167,6 +182,7 @@ void tcp_process(eth_hdr_t *eth_hdr, uint32_t len) {
       record->snd_unack = iss;
       record->rcv_next  = rcv_next;
       record->state     = TCP_SYN_RECEIVED;
+      puts("LISTEN\n");
       eth_send(eth_hdr->src_mac, eth_hdr, len);
       return;
     case TCP_SYN_RECEIVED:
@@ -180,6 +196,7 @@ void tcp_process(eth_hdr_t *eth_hdr, uint32_t len) {
         eth_send(eth_hdr->src_mac, eth_hdr, len);
         return;
       }
+      puts("SYN_RECEIVED");
 
       if (hdr->hdr_len_control & TCP_CONTROL_RST) {
         record->state = TCP_LISTEN;
@@ -194,8 +211,10 @@ void tcp_process(eth_hdr_t *eth_hdr, uint32_t len) {
       if (!(hdr->hdr_len_control & TCP_CONTROL_ACK)) { return; }
       if (hdr->ack < record->snd_unack || hdr->ack > record->snd_next) { return; }
       record->state = TCP_ESTABLISHED;
+      record->event = true;
       return;
     case TCP_ESTABLISHED:
+      record->event = true;
       break;
     default:
       puts("Dropping TCP transaction\n");
@@ -237,4 +256,8 @@ void eth_process(uint8_t *frame, uint32_t len) {
     default:
       printf("Unsupported ethertype: 0x%04x\n", hdr->ether_type);
   }
+}
+
+void net_init() {
+  task_init(&net_task, net_task_func, NULL, 0, net_task_stack, NET_STACK_SIZE);
 }

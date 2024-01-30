@@ -100,3 +100,4 @@ typedef struct {
 
 void eth_send(uint8_t *mac, eth_hdr_t *frame, uint32_t len);
 void eth_process(uint8_t *frame, uint32_t len);
+void net_init();
